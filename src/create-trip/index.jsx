@@ -1,8 +1,36 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import MinePlacesAutocomplete from "../searchelemnt/MinePlacesAutocomplete";
 import { Input } from "../components/ui/input";
+import { SelectBudgetList, SelectTravelesList } from "../constants/options";
+import { Button } from "../components/ui/button";
 
 function CreateTrip() {
+  const [fromDate, setfromDate] = useState([]);
+  const [location, setLocation] = useState("");
+  const handleInputChange = (name, value) => {
+
+
+
+    setfromDate({
+      ...fromDate,
+      [name]: value,
+    })
+  };
+
+  useEffect(()=>{
+    console.log(fromDate)
+  },[fromDate])
+
+  const OngenrateTrip=()=>{
+    if (fromDate?.days<1) {
+      console.log('Please the days grater then 0')
+      return;
+      
+    }
+    console.log(fromDate)
+
+  }
+
   return (
     <div className="sm:px-10 md:px-32 lg:px-56 xl:px-72 px-5 mt-10">
       <h2 className="font-bold text-3xl ">Tell us your travel preferences</h2>
@@ -11,20 +39,68 @@ function CreateTrip() {
         care of the rest.
       </p>
 
-      <div className="mt-20 flex flex-col gap-10">
+      <div className="mt-16 flex flex-col gap-10">
         <div>
           <h2 className="text-xl my-3 font-medium">
             What is destination of choice?
           </h2>
-          <MinePlacesAutocomplete />
+          <MinePlacesAutocomplete
+            onSelect={(value) => {
+              setLocation(value);
+              handleInputChange("location", value); // Use `value`, not `v`
+            }}
+          />
         </div>
         <div>
           <h2 className="text-xl my-3 font-medium">
-           How many days are you planning to trip?
+            How many days are you planning to trip?
           </h2>
-          <Input type="number"  placeholder={'Ex.4'} />
-
+          <Input type="number" placeholder={"Ex.4"} 
+          onChange={(e)=>handleInputChange("days",e.target.value)}
+          />
         </div>
+      </div>
+      <div>
+        <h2 className="text-xl my-3 font-medium">What is Your Budget?</h2>
+        <div className="grid grid-cols-4 gap-5 mt-5">
+          {SelectBudgetList.map((item, index) => (
+            <div
+              key={index}
+              onClick={()=>handleInputChange('budget',item.title)}
+              className={`p-4 border rounded-lg hover:shadow-lg cursor-pointer
+                ${fromDate.budget === item.title ? "bg-blue-100 shadow-lg" : ""}
+              `}
+            >
+              <h2 className="text-4xl">{item.icon}</h2>
+              <h2 className="font-bold text-lg">{item.title}</h2>
+              <h2 className="text-sm text-gray-500">{item.description}</h2>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-xl my-3 font-medium">
+          Who do you plan on traveling with on your next adventure?
+        </h2>
+        <div className="grid grid-cols-4 gap-5 mt-5">
+          {SelectTravelesList.map((item, index) => (
+            <div
+              key={index}
+              onClick={()=>handleInputChange('infos',item.description)}
+              className={`p-4 border rounded-lg hover:shadow-lg cursor-pointer
+                ${fromDate.infos === item.description ? "bg-blue-100 shadow-lg" : ""}
+              `}
+            >
+              <h2 className="text-4xl">{item.icon}</h2>
+              <h2 className="font-bold text-lg">{item.title}</h2>
+              <h2 className="text-sm text-gray-500">{item.description}</h2>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="my-10 justify-end flex">
+        <Button onClick={OngenrateTrip}>Generate Trip</Button>
       </div>
     </div>
   );

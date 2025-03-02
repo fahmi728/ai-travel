@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function MinePlacesAutocomplete() {
+function MinePlacesAutocomplete({ onSelect }) { // Add onSelect prop
   const [suggestions, setSuggestions] = useState([]);
   const [query, setQuery] = useState('');
 
@@ -29,15 +29,12 @@ function MinePlacesAutocomplete() {
     }
   };
 
-  const displayLatLon = (display_name, lat, lon) => {
-    const resultString = `You have selected ${display_name}<br/>Lat: ${lat}<br/>Lon: ${lon}`;
-    document.getElementById("result").innerHTML = resultString;
-  };
-
   const handleSelect = (suggestion) => {
     setQuery(suggestion.value);
     setSuggestions([]);
-    displayLatLon(suggestion.data.display_name, suggestion.data.lat, suggestion.data.lon);
+    
+    // Send the selected value to the parent
+    onSelect(suggestion.value); 
   };
 
   return (
@@ -64,7 +61,6 @@ function MinePlacesAutocomplete() {
           ))}
         </div>
       )}
-      {/* <div id="result" className="mt-4 text-gray-700"></div> */}
     </>
   );
 }
