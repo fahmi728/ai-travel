@@ -9,10 +9,24 @@ import {
 import { Button } from "../components/ui/button";
 import { toast } from "sonner";
 import { chatSession } from "../service/AImodal";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { FcGoogle } from "react-icons/fc";
+import { useGoogleLogin } from "@react-oauth/google";
+import axios from 'axios';
+
 
 function CreateTrip() {
   const [fromDate, setfromDate] = useState([]);
   const [location, setLocation] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+
   const handleInputChange = (name, value) => {
     setfromDate({
       ...fromDate,
@@ -24,7 +38,19 @@ function CreateTrip() {
     console.log(fromDate);
   }, [fromDate]);
 
+  const Login = useGoogleLogin({
+    onSuccess:(codeResp)=>GetUserProfile(codeResp),
+    onError:(error)=>console.log(error)
+
+  })
+
   const OngenrateTrip = async () => {
+    const user = localStorage.getItem("user");
+    if (!user) {
+      setOpenDialog(true);
+      return;
+    }
+
     if (
       (fromDate?.days < 1 && !fromDate?.infos) ||
       !fromDate?.budget ||
@@ -42,6 +68,23 @@ function CreateTrip() {
     const result = await chatSession.sendMessage(FINAL_PROMPT);
     console.log(result?.response?.text());
   };
+
+  const GetUserProfile = (tokeninfo) =>{
+    axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokeninfo?.access_token}`,{
+      headers:{
+        Authorization:`Bearer ${tokeninfo?.access_token}`
+      }
+    }).then((res)=>{
+      console.log(res.data);
+      localStorage.setItem("user",JSON.stringify(res.data));
+      setOpenDialog(false);
+
+      OngenrateTrip();
+    })
+  }
+
+
+
 
   return (
     <div className="sm:px-10 md:px-32 lg:px-56 xl:px-72 px-5 mt-10">
@@ -120,6 +163,26 @@ function CreateTrip() {
       <div className="my-10 justify-end flex">
         <Button onClick={OngenrateTrip}>Generate Trip</Button>
       </div>
+
+      <Dialog open={openDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogDescription>
+              <img src="/logo.svg" />
+              <h2 className="font-bold text-lg mt-7">Sgin In With Google</h2>
+              <p>Sign in to the App with Google authentication securely</p>
+
+              <Button 
+
+              onClick={Login}
+              className="w-full mt-5 flex gap-4 items-center">
+                <FcGoogle className="h-7 w-7" />
+                Sign In With Google
+              </Button>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
