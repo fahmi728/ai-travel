@@ -19,13 +19,16 @@ import {
 } from "@/components/ui/dialog";
 import { FcGoogle } from "react-icons/fc";
 import { useGoogleLogin } from "@react-oauth/google";
-import axios from 'axios';
-
+import axios from "axios";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../service/firebaseConfig";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 function CreateTrip() {
   const [fromDate, setfromDate] = useState([]);
   const [location, setLocation] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [loding, setLoding] = useState(false);
 
   const handleInputChange = (name, value) => {
     setfromDate({
@@ -39,10 +42,9 @@ function CreateTrip() {
   }, [fromDate]);
 
   const Login = useGoogleLogin({
-    onSuccess:(codeResp)=>GetUserProfile(codeResp),
-    onError:(error)=>console.log(error)
-
-  })
+    onSuccess: (codeResp) => GetUserProfile(codeResp),
+    onError: (error) => console.log(error),
+  });
 
   const OngenrateTrip = async () => {
     const user = localStorage.getItem("user");
@@ -59,32 +61,52 @@ function CreateTrip() {
       toast("Please fill all the fields", "error");
       return;
     }
+
+    setLoding(true);
     const FINAL_PROMPT = AI_PROMPT.replace("{location}", fromDate.location)
       .replace("{totalDays}", fromDate.days)
       .replace("{infos}", fromDate.infos)
       .replace("{budget}", fromDate.budget)
       .replace("{totalDays}", fromDate.days);
-    console.log(FINAL_PROMPT);
     const result = await chatSession.sendMessage(FINAL_PROMPT);
+    setLoding(false);
     console.log(result?.response?.text());
+    SaveAiTrip(result?.response?.text());
   };
 
-  const GetUserProfile = (tokeninfo) =>{
-    axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokeninfo?.access_token}`,{
-      headers:{
-        Authorization:`Bearer ${tokeninfo?.access_token}`
-      }
-    }).then((res)=>{
-      console.log(res.data);
-      localStorage.setItem("user",JSON.stringify(res.data));
-      setOpenDialog(false);
+  const SaveAiTrip = async (TripDate) => {
+    setLoding(true);
 
-      OngenrateTrip();
-    })
-  }
+    const user = JSON.parse(localStorage.getItem("user"));
+    const docId = Date.now().toString();
+    await setDoc(doc(db, "AITrips", docId), {
+      userSelection: fromDate,
+      tripData: JSON.parse(TripDate),
+      userEmail: user?.email,
+      id: docId,
+      createdAt: new Date(),
+    });
+    setLoding(false);
+  };
 
+  const GetUserProfile = (tokeninfo) => {
+    axios
+      .get(
+        `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokeninfo?.access_token}`,
+        {
+          headers: {
+            Authorization: `Bearer ${tokeninfo?.access_token}`,
+          },
+        }
+      )
+      .then((res) => {
+        console.log(res.data);
+        localStorage.setItem("user", JSON.stringify(res.data));
+        setOpenDialog(false);
 
-
+        OngenrateTrip();
+      });
+  };
 
   return (
     <div className="sm:px-10 md:px-32 lg:px-56 xl:px-72 px-5 mt-10">
@@ -161,7 +183,12 @@ function CreateTrip() {
         </div>
       </div>
       <div className="my-10 justify-end flex">
-        <Button onClick={OngenrateTrip}>Generate Trip</Button>
+        <Button disabled={loding} onClick={OngenrateTrip}>
+          {loding ? (
+            <AiOutlineLoading3Quarters className="h-7 w-7 animate-spin" />
+          ) : null}
+          Generate Trip
+        </Button>
       </div>
 
       <Dialog open={openDialog}>
@@ -172,10 +199,11 @@ function CreateTrip() {
               <h2 className="font-bold text-lg mt-7">Sgin In With Google</h2>
               <p>Sign in to the App with Google authentication securely</p>
 
-              <Button 
-
-              onClick={Login}
-              className="w-full mt-5 flex gap-4 items-center">
+              <Button
+                disabled={loding}
+                onClick={Login}
+                className="w-full mt-5 flex gap-4 items-center"
+              >
                 <FcGoogle className="h-7 w-7" />
                 Sign In With Google
               </Button>
