@@ -23,13 +23,14 @@ import axios from "axios";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../service/firebaseConfig";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
 
 function CreateTrip() {
   const [fromDate, setfromDate] = useState([]);
   const [location, setLocation] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [loding, setLoding] = useState(false);
-
+  const router=useNavigate();
   const handleInputChange = (name, value) => {
     setfromDate({
       ...fromDate,
@@ -73,20 +74,57 @@ function CreateTrip() {
     console.log(result?.response?.text());
     SaveAiTrip(result?.response?.text());
   };
+  function convertToValidJSON(text) {
+    // Extract the JSON part from the text
+    const jsonString = text.match(/```json\n([\s\S]*?)```/)[1];
+  
+    // Parse the JSON string
+    try {
+      const jsonObject = JSON.parse(jsonString);
+      return jsonObject;
+    } catch (error) {
+      console.error('Invalid JSON format:', error);
+      return null;
+    }
+  }
+  
 
+  
   const SaveAiTrip = async (TripDate) => {
     setLoding(true);
+      // Process the AI response
+        // Example usage
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    const docId = Date.now().toString();
-    await setDoc(doc(db, "AITrips", docId), {
-      userSelection: fromDate,
-      tripData: JSON.parse(TripDate),
-      userEmail: user?.email,
-      id: docId,
-      createdAt: new Date(),
-    });
-    setLoding(false);
+      const validJSON = convertToValidJSON(TripDate);
+  
+      if (validJSON) {
+        console.log('Valid JSON:', validJSON);
+      } else {
+        console.log('Failed to convert to valid JSON.');
+      }
+    
+      
+      if (!validJSON) {
+        toast.error('Failed to parse trip data');
+        return;
+      }
+  
+      // Save to Firestore
+      const user = JSON.parse(localStorage.getItem("user"));
+      const docId = Date.now().toString();
+      
+      await setDoc(doc(db, "AITrips", docId), {
+        userSelection: fromDate,
+        tripData: validJSON,
+        userEmail: user?.email,
+        id: docId,
+        createdAt: new Date(),
+      });
+  
+      toast.success('Trip saved successfully!');
+      setLoding(false);
+      router('/view-trip/'+docId);
+    
   };
 
   const GetUserProfile = (tokeninfo) => {
