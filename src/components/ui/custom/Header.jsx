@@ -1,14 +1,51 @@
-import React, { useEffect } from "react";
+import React, { useEffect ,useState} from "react";
 import { Button } from "../../ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import axios from "axios";
+import { FcGoogle } from "react-icons/fc";
+
+
 import { googleLogout } from "@react-oauth/google";
+import { useGoogleLogin } from "@react-oauth/google";
 
 function Header() {
+  const GetUserProfile = (tokeninfo) => {
+    axios
+      .get(
+        `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokeninfo?.access_token}`,
+        {
+          headers: {
+            Authorization: `Bearer ${tokeninfo?.access_token}`,
+          },
+        }
+      )
+      .then((res) => {
+        console.log(res.data);
+        localStorage.setItem("user", JSON.stringify(res.data));
+        setOpenDialog(false);
+        window.location.reload();
+      });
+  };
+    const [openDialog, setOpenDialog] = useState(false);
+      const [loding, setLoding] = useState(false);
+    
   const users = JSON.parse(localStorage.getItem("user"));
+  const Login = useGoogleLogin({
+    onSuccess: (codeResp) => GetUserProfile(codeResp),
+    onError: (error) => console.log(error),
+  });
   useEffect(() => {
     console.log(users);
   }, []);
@@ -18,9 +55,16 @@ function Header() {
       <div>
         {users ? (
           <div className="flex items-center space-x-3">
+           <a href="/create-trip" className="text-gray-500">
+            <Button variant="outline" className="rounded-full">
+              + Create Trip
+            </Button>
+            </a>
+            <a href="/my-trips" className="text-gray-500">
             <Button variant="outline" className="rounded-full">
               My Trips
             </Button>
+            </a>
 
             <Popover>
               <PopoverTrigger>
@@ -41,9 +85,29 @@ function Header() {
             </Popover>
           </div>
         ) : (
-          <Button>Sign In</Button>
+          <Button onClick={()=>setOpenDialog(true)}>Get Started</Button>
         )}
       </div>
+       <Dialog open={openDialog}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogDescription>
+                    <img src="/logo.svg" />
+                    <h2 className="font-bold text-lg mt-7">Sgin In With Google</h2>
+                    <p>Sign in to the App with Google authentication securely</p>
+      
+                    <Button
+                      disabled={loding}
+                      onClick={Login}
+                      className="w-full mt-5 flex gap-4 items-center"
+                    >
+                      <FcGoogle className="h-7 w-7" />
+                      Sign In With Google
+                    </Button>
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
     </div>
   );
 }
