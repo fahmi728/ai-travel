@@ -1,4 +1,4 @@
-const BASE_URL='https://places.googleapis.com/v1/places:searchText'
+const BASE_URL = 'https://serpapi.com/search.json?engine=google_maps&q=Coffee&ll=@40.7455096,-74.0083012,14z';
 
 export const fetchUnsplashPhoto = async (placeName) => {
     const ACCESS_KEY = "o_Z0-qxqBqWs34lxbEksO7tWM0i0KyscNE-lN-iv1mc";
@@ -15,3 +15,4 @@ export const fetchUnsplashPhoto = async (placeName) => {
       return null;
     }
   };
+

@@ -4,6 +4,8 @@ function MinePlacesAutocomplete({ onSelect }) { // Add onSelect prop
   const [suggestions, setSuggestions] = useState([]);
   const [query, setQuery] = useState('');
 
+
+  
   const fetchPlaces = async (e) => {
     const query = e.target.value;
     setQuery(query);

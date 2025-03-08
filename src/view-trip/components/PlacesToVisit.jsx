@@ -9,6 +9,7 @@ function PlacesToVisit({trip}) {
     }))
     .reverse(); // Reverse the order
     //   console.log(itineraryArray);
+
   return (
     <div className='mt-10'>
         <h2 className='font-bold text-lg'>Places To Visit</h2>

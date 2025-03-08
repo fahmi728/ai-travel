@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import { IoIosSend } from "react-icons/io";
 import { fetchUnsplashPhoto } from "../../service/GlobalApi";
+// import { fetchPlaces } from "../../service/GlobalApi";
 
 function InfoSection({ trip }) {
-  console.log("this trip",trip);
   const [imageUrl, setImageUrl] = useState("/placeholder.jpg"); // Default placeholder
 
   useEffect(() => {
