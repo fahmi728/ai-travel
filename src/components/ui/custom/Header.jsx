@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/dialog";
 import axios from "axios";
 import { FcGoogle } from "react-icons/fc";
+import { IoSettingsSharp } from "react-icons/io5";
+import { FaHistory } from "react-icons/fa";
 
-
+import { IoAddCircle } from "react-icons/io5";
 import { googleLogout } from "@react-oauth/google";
 import { useGoogleLogin } from "@react-oauth/google";
 
@@ -50,22 +52,27 @@ function Header() {
     console.log(users);
   }, []);
   return (
-    <div className="p-3 shadow-sm flex justify-between items-center px-5">
+    <div  className="p-3 shadow-sm flex justify-between items-center px-5">
       <img src="/logo.svg" alt="" srcset="" />
       <div>
         {users ? (
           <div className="flex items-center space-x-3">
            <a href="/create-trip" className="text-gray-500">
             <Button variant="outline" className="rounded-full">
-              + Create Trip
+            <IoAddCircle /> Create Trip
             </Button>
             </a>
             <a href="/my-trips" className="text-gray-500">
             <Button variant="outline" className="rounded-full">
-              My Trips
+            <FaHistory /> My Trips
             </Button>
             </a>
-
+            <a href="/setting" className="text-gray-500">
+            <Button variant="outline" className="rounded-full">
+            <IoSettingsSharp /> Settings
+            </Button>
+            </a>
+            {users ?
             <Popover>
               <PopoverTrigger>
                 <img
@@ -82,7 +89,7 @@ function Header() {
                   window.location.reload();
                 }}>LogOut</h2>
               </PopoverContent>
-            </Popover>
+            </Popover>:null}
           </div>
         ) : (
           <Button onClick={()=>setOpenDialog(true)}>Get Started</Button>

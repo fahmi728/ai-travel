@@ -7,6 +7,7 @@ import InfoSection from '../components/InfoSection';
 import Hotels from '../components/Hotels';
 import PlacesToVisit from '../components/PlacesToVisit';
 import Footer from '../components/Footer';
+import { useThemeStore } from '../../components/useThemeStore';
 
 function Viewtrip() {
 
@@ -31,9 +32,10 @@ function Viewtrip() {
             toast("No Trip Found");
         }
     }
+    const {theme}= useThemeStore();
 
   return (
-    <div className='p-10 md:px-20 lg:px-44 xl:px-56'>
+    <div  data-theme={theme} className='p-10 md:px-20 lg:px-44 xl:px-56'>
         {/* Infromation sectio */}
         <InfoSection trip={trip} />
 
