@@ -30,7 +30,7 @@ function MyTrips() {
       trips.push(doc.data());
     });
     setUserTrips(trips);
-    console.log(trips);
+    // console.log(trips);
   };
   return( 
   <div className="sm:px-10 md:px-32 lg:px-56 xl:px-72 px-5 mt-10">

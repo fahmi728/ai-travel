@@ -27,10 +27,7 @@ const router = createBrowserRouter([
   {
     path: "/my-trips",
     element: <MyTrips />
-  },{
-    path: "/setting",
-    element:<Setting />
-  }
+  },
 
 ]);
 const RootComponent = () => {
